@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var firstNumberEmojis = ""
     @State private var secondNumberEmojis = ""
     @State private var answer = ""
+    @State private var message = ""
     @State private var audioPlayer: AVAudioPlayer!
     @State private var textFieldIsDisabled = false
     @State private var guessButtonDisabled = false
@@ -23,16 +24,18 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
+            Text(firstNumberEmojis)
+                .font(.system(size: 80))
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.5)
+                .padding()
+            Text("+")
+            Text(secondNumberEmojis)
+                .font(.system(size: 80))
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.5)
+                .padding()
             
-            Group {
-                Text(firstNumberEmojis)
-                Text("+")
-                Text(secondNumberEmojis)
-            }
-            .font(.system(size: 80))
-            .multilineTextAlignment(.center)
-            .minimumScaleFactor(0.5)
-            .padding()
             
             Spacer()
             
@@ -58,8 +61,10 @@ struct ContentView: View {
                 textFieldIsFocused = false
                 if answer == String(firstNumber + secondNumber) {
                     playsound(soundName: "correct")
+                    message = "Correct!"
                 } else {
                     playsound(soundName: "wrong")
+                    message = "Sorry, the correct answer is \(firstNumber + secondNumber)"
                 }
                 answer = ""
                 textFieldIsDisabled = true
@@ -70,16 +75,34 @@ struct ContentView: View {
             
             Spacer()
             
+            Text(message)
+                .font(.largeTitle)
+                .fontWeight(.black)
+                .multilineTextAlignment(.center)
+                .foregroundColor(message == "Correct!" ? .green : .red)
+            
+            if guessButtonDisabled {
+                Button("Play Again?") {
+                    answer = ""
+                    textFieldIsDisabled = false
+                    guessButtonDisabled = false
+                    message = ""
+                    quizMaker()
+                }
+            }
+            
         }
         .padding()
         .onAppear(perform: {
-            firstNumber = Int.random(in: 1...10)
-            secondNumber = Int.random(in: 1...10)
-            firstNumberEmojis = String(repeating: emojis.randomElement()!, count: firstNumber)
-            secondNumberEmojis = String(repeating: emojis.randomElement()!, count: secondNumber)
+            quizMaker()
         })
     }
-    
+    func quizMaker() {
+        firstNumber = Int.random(in: 1...10)
+        secondNumber = Int.random(in: 1...10)
+        firstNumberEmojis = String(repeating: emojis.randomElement()!, count: firstNumber)
+        secondNumberEmojis = String(repeating: emojis.randomElement()!, count: secondNumber)
+    }
     func playsound(soundName: String) {
         guard let soundFile = NSDataAsset(name: soundName) else {
             print("🥲 Could not read file named \(soundName) 🥲")
